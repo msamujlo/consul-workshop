@@ -1,11 +1,15 @@
 package weather.sensors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import weather.WeatherProperties;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
 
 public class SensorsHealthIndicator implements HealthIndicator {
+
+    private static final Log logger = LogFactory.getLog(SensorsHealthIndicator.class);
 
     private final WeatherProperties weatherProperties;
     private final SensorsProperties sensorsProperties;
@@ -17,10 +21,14 @@ public class SensorsHealthIndicator implements HealthIndicator {
 
     @Override
     public Health health() {
-        // TODO
-        // If current temperature (weatherProperties.temperature) exceeds any of sensors thresholds
-        // (sensors.minTemperature, sensors.maxTemperature) then return status DOWN with appropriate
-        // message (details), otherwise return status UP.
+        if (weatherProperties.getTemperature()>sensorsProperties.getMaxTemperature()) {
+            logger.warn("too hot!");
+            return Health.down().withDetail("reason", "Too hot!").build();
+        }
+        if (weatherProperties.getTemperature()<sensorsProperties.getMinTemperature()) {
+            logger.warn("freezing cold!");
+            return Health.down().withDetail("reason","Freezing cold!").build();
+        }
         return Health.status(Status.UP).build();
     }
 }
