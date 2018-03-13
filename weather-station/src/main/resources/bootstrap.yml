@@ -3,8 +3,11 @@ spring:
     name: weather-station
   cloud:
     consul:
-#      host: 192.168.0.5 - use your IP when running consul on local network
+#      host: 192.168.0.5 - use IP of machine where consul is running
       port: 8500
       discovery:
-         instanceId: ${spring.application.name}_${server.port}
+#        instanceId: ${spring.application.name}_${server.port}
+        tags: v1
 #        instanceId: ${spring.application.name}_${random.value}
+
+
