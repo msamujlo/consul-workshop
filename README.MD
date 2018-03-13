@@ -75,6 +75,9 @@ restart application and observe status in consul. Moreover visit health endpoint
 
 [http://localhost:8080/health](http://localhost:8080/health)
 
+**Note**: Consider analyzing `org.springframework.boot.actuate.health.DiskSpaceHealthIndicator.java` which performs similar 
+logic, but regarding available disk space.
+
 ## Weather Station: Key/Value Store
 Although we have solved the problem after few hours we receive another email, this time it's from operations team:
 
