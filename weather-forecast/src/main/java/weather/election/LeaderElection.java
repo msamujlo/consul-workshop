@@ -2,8 +2,10 @@ package weather.election;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
+import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.kv.model.PutParams;
 import com.ecwid.consul.v1.session.model.NewSession;
+import com.ecwid.consul.v1.session.model.Session;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -50,30 +52,32 @@ public class LeaderElection {
         }
     }
 
-    private boolean tryLock(String sessionId) {
-        // TODO
-        // 1. Create PutParams with property to acquire session id
-        // 2. Try to set value of key in consul with information regarding this contender (setKVValue method)
-        // 2.1 Key used for election can be found in LeaderElectionProperties
-        // 2.2 Contender information should be serialized to json
-        // 3. Return whether action was successful
+    private boolean tryLock(String sessionId) throws JsonProcessingException {
+        PutParams putParams = new PutParams();
+        putParams.setAcquireSession(sessionId);
+        String contenderJson = mapper.writeValueAsString(contender);
 
-        return false;
+        Response<Boolean> booleanResponse = consul.setKVValue(properties.getKey(), contenderJson, putParams);
+
+        return booleanResponse.getValue();
     }
 
     private boolean sessionExists(String sessionId) {
-        // TODO
-        // 1. Return information weather particular session is known to consul (getSessionInfo method)
-        // 2. Use QueryParams.DEFAULT as the parameters
-        // 3. If session is known to consul the result value will be non null
-        // 4. If sessions is null you can already return false
 
-        return false;
+        if (sessionId==null) {
+            return false;
+        }
+
+        Response<Session> sessionInfo = consul.getSessionInfo(sessionId, QueryParams.DEFAULT);
+
+        return sessionInfo.getValue()!=null;
     }
 
     private String sessionCreate() {
+
         final NewSession newSession = new NewSession();
         newSession.setName(contender.getServiceId());
+
         newSession.setChecks(asList("serfHealth", "service:" + contender.getServiceId()));
 
         return consul.sessionCreate(newSession, QueryParams.DEFAULT).getValue();

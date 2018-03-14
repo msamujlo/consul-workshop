@@ -12,5 +12,5 @@ weather-station:
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 10000
 
 election:
-  enabled: false
+  enabled: true
   key: service/${spring.application.name}/leader
